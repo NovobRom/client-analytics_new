@@ -4,7 +4,7 @@ import { state, COUNTRY_MAP } from './config.js';
 
 export const TRANSLATIONS = {
     ua: {
-        appTitle: "Аналітика Клієнтів v14.1",
+        appTitle: "Аналітика Клієнтів v16.0",
         btnUpload: "Завантажити файл",
         loadingText: "Обробка даних...",
         loadingSub: "Це може зайняти кілька секунд",
@@ -101,7 +101,7 @@ export const TRANSLATIONS = {
         modalReceiverCitiesTitle: "🏙️ Міста отримання (Топ-5)"
     },
     en: {
-        appTitle: "Client Analytics v14.1",
+        appTitle: "Client Analytics v16.0",
         btnUpload: "Upload File",
         loadingText: "Processing Data...",
         loadingSub: "This may take a few seconds",
