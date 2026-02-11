@@ -39,6 +39,36 @@ export function openModal(client) {
         renderList(client.destinationsMap, 'modalDestList', 'modalDestCount', true);
         renderList(client.items, 'modalItemsList', 'modalItemCount', false);
 
+        // Weight info
+        document.getElementById('modalTotalWeight').textContent =
+            client.totalWeight.toFixed(2) + ' kg';
+        document.getElementById('modalAvgWeight').textContent =
+            (client.weightedCount > 0 ? (client.totalWeight / client.weightedCount).toFixed(2) : '0') + ' kg';
+
+        // Channel badges
+        const renderChannelBadges = (map, elId) => {
+            const el = document.getElementById(elId);
+            const entries = Object.entries(map).sort((a, b) => b[1] - a[1]);
+            const total = entries.reduce((s, e) => s + e[1], 0);
+            el.innerHTML = total === 0 ? '<span class="text-xs text-gray-400">—</span>' : entries.map(([ch, cnt]) => {
+                const pct = total ? ((cnt / total) * 100).toFixed(0) : 0;
+                return `<span class="inline-block bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-0.5 rounded mr-1 mb-1">${ch}: ${cnt} (${pct}%)</span>`;
+            }).join('');
+        };
+        renderChannelBadges(client.senderChannels, 'modalSenderChannels');
+        renderChannelBadges(client.receiverChannels, 'modalReceiverChannels');
+
+        // Top cities
+        const renderCityList = (map, elId) => {
+            const el = document.getElementById(elId);
+            const sorted = Object.entries(map).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            el.innerHTML = sorted.length === 0 ? '<span class="text-xs text-gray-400">—</span>' : sorted.map(([city, cnt]) =>
+                `<div class="flex justify-between text-xs py-0.5"><span>${city}</span><span class="font-bold">${cnt}</span></div>`
+            ).join('');
+        };
+        renderCityList(client.senderCities, 'modalSenderCities');
+        renderCityList(client.receiverCities, 'modalReceiverCities');
+
         modal.classList.remove('hidden');
         setTimeout(() => {
             panel.classList.remove('scale-95', 'opacity-0');

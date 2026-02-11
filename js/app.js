@@ -50,11 +50,18 @@ document.getElementById('langToggle').addEventListener('change', function () {
     // Update chart dataset labels then re-render if data is loaded
     if (Object.keys(state.charts).length > 0) {
         const t = TRANSLATIONS[state.currentLang];
-        if (state.charts.revenue)        state.charts.revenue.data.datasets[0].label        = t.chartLabelRev;
-        if (state.charts.avgCheck)       state.charts.avgCheck.data.datasets[0].label       = t.chartLabelAvg;
-        if (state.charts.count)          state.charts.count.data.datasets[0].label          = t.chartLabelCount;
-        if (state.charts.revenueCountry) state.charts.revenueCountry.data.datasets[0].label = t.chartLabelRev;
-        if (state.charts.avgCheckCountry)state.charts.avgCheckCountry.data.datasets[0].label= t.chartLabelAvg;
+        if (state.charts.revenue)         state.charts.revenue.data.datasets[0].label         = t.chartLabelRev;
+        if (state.charts.avgCheck)        state.charts.avgCheck.data.datasets[0].label        = t.chartLabelAvg;
+        if (state.charts.count)           state.charts.count.data.datasets[0].label           = t.chartLabelCount;
+        if (state.charts.revenueCountry)  state.charts.revenueCountry.data.datasets[0].label  = t.chartLabelRev;
+        if (state.charts.avgCheckCountry) state.charts.avgCheckCountry.data.datasets[0].label = t.chartLabelAvg;
+        if (state.charts.channelRevenue)  state.charts.channelRevenue.data.datasets[0].label  = t.chartLabelRev;
+        if (state.charts.weightDirection) state.charts.weightDirection.data.datasets[0].label  = t.chartLabelAvgWeight || 'Avg Weight (kg)';
+        if (state.charts.weightChannel)   state.charts.weightChannel.data.datasets[0].label   = t.chartLabelAvgWeight || 'Avg Weight (kg)';
+        if (state.charts.senderCity)      state.charts.senderCity.data.datasets[0].label      = t.chartLabelRev;
+        if (state.charts.receiverCity)    state.charts.receiverCity.data.datasets[0].label    = t.chartLabelRev;
+        if (state.charts.cityRoute)       state.charts.cityRoute.data.datasets[0].label       = t.chartLabelCount;
+        if (state.charts.revPerKg)        state.charts.revPerKg.data.datasets[0].label        = t.chartLabelRevPerKg || '€/kg';
         recalculateDashboard();
     }
 

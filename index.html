@@ -162,6 +162,40 @@
                 </div>
             </div>
 
+            <!-- WEIGHT KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="card border-l-4 border-teal-500">
+                    <h3 class="text-gray-500 text-sm font-medium" data-i18n="totalWeight">Загальна вага</h3>
+                    <p class="text-3xl font-bold text-gray-800" id="totalWeight">0 kg</p>
+                </div>
+                <div class="card border-l-4 border-teal-400">
+                    <h3 class="text-gray-500 text-sm font-medium" data-i18n="avgWeightShipment">Сер. вага / відправлення</h3>
+                    <p class="text-3xl font-bold text-gray-800" id="avgWeight">0 kg</p>
+                </div>
+                <div class="card border-l-4 border-teal-300">
+                    <h3 class="text-gray-500 text-sm font-medium" data-i18n="revenuePerKg">Дохід за кг</h3>
+                    <p class="text-3xl font-bold text-gray-800" id="revenuePerKg">0 €/kg</p>
+                </div>
+                <div class="card border-l-4 border-teal-600">
+                    <h3 class="text-gray-500 text-sm font-medium" data-i18n="shipmentsWithWeight">Відправок з вагою</h3>
+                    <p class="text-3xl font-bold text-gray-800" id="weightedShipments">0</p>
+                </div>
+            </div>
+
+            <!-- CHANNEL PREFERENCES BY ABC -->
+            <div class="card bg-white border border-gray-100 shadow-sm">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-3" data-i18n="channelAbcTitle">Канальні вподобання за ABC класом</h3>
+                <div id="channelAbcContainer" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                </div>
+            </div>
+
+            <!-- WEIGHT BY ABC -->
+            <div class="card bg-white border border-gray-100 shadow-sm">
+                <h3 class="text-sm font-bold text-gray-500 uppercase mb-3" data-i18n="weightAbcTitle">Середня вага за ABC класом</h3>
+                <div id="weightAbcContainer" class="grid grid-cols-3 gap-4 text-center">
+                </div>
+            </div>
+
             <!-- NEW: ORIGIN REVENUE BREAKDOWN -->
             <div class="card bg-white border border-gray-100 shadow-sm" id="originBreakdownSection">
                 <h3 class="text-sm font-bold text-gray-500 uppercase mb-3" data-i18n="lblOriginBreakdown">Вклад країн відправників (Дохід)</h3>
@@ -223,6 +257,87 @@
                 </div>
             </div>
 
+            <!-- CHARTS ROW 4: CHANNELS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartSenderChannels">📤 Розподіл каналів відправлення</h3>
+                    <div class="relative h-64">
+                        <canvas id="senderChannelChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartReceiverChannels">📥 Розподіл каналів отримання</h3>
+                    <div class="relative h-64">
+                        <canvas id="receiverChannelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW 5: CHANNEL DETAILS -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartChannelRevenue">💰 Дохід за каналом відправлення</h3>
+                    <div class="relative h-64">
+                        <canvas id="channelRevenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartChannelFlow">🔀 Матриця потоку каналів</h3>
+                    <div class="relative h-64">
+                        <canvas id="channelFlowChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW 6: WEIGHT -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartWeightByDirection">📦 Середня вага за напрямком (Топ-10)</h3>
+                    <div class="relative h-64">
+                        <canvas id="weightDirectionChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartWeightByChannel">⚖️ Середня вага за каналом</h3>
+                    <div class="relative h-64">
+                        <canvas id="weightChannelChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW 7: CITIES -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartTopSenderCities">🏙️ Топ-10 міст відправлення (дохід)</h3>
+                    <div class="relative h-64">
+                        <canvas id="senderCityChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartTopReceiverCities">🏙️ Топ-10 міст отримання (дохід)</h3>
+                    <div class="relative h-64">
+                        <canvas id="receiverCityChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHARTS ROW 8: CITY ROUTES + REVENUE PER KG -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartTopCityRoutes">🛤️ Топ-10 маршрутів місто→місто</h3>
+                    <div class="relative h-64">
+                        <canvas id="cityRouteChart"></canvas>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4" data-i18n="chartRevPerKgDirection">💎 Дохід за кг по напрямку (Топ-10)</h3>
+                    <p class="text-xs text-gray-400 mb-2" data-i18n="chartRevPerKgHint">Ідентифікація преміум-маршрутів</p>
+                    <div class="relative h-64">
+                        <canvas id="revPerKgChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
             <!-- SEGMENT FILTERS -->
             <div class="card bg-white border border-gray-200">
                 <h3 class="text-sm font-bold text-gray-500 uppercase mb-3" data-i18n="filterBySegment">Фільтр по сегментах</h3>
@@ -255,6 +370,7 @@
                                 <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" onclick="sortTable('segment')"><span data-i18n="thSegment">Сегмент</span> ↕</th>
                                 <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onclick="sortTable('revenue')"><span data-i18n="thRevenue">Дохід (EUR)</span> ↕</th>
                                 <th class="px-4 py-3 text-center cursor-pointer hover:bg-gray-100" onclick="sortTable('count')"><span data-i18n="thCount">К-сть</span> ↕</th>
+                                <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100 bg-teal-50" onclick="sortTable('totalWeight')"><span data-i18n="thWeight">Вага (кг)</span> ↕</th>
                                 <th class="px-4 py-3 text-right cursor-pointer hover:bg-gray-100 bg-yellow-50" onclick="sortTable('avgCheck')"><span data-i18n="thAvgCheck">Сер. Чек</span> ↕</th>
                                 <th class="px-4 py-3 bg-blue-50"><span data-i18n="thDest">Куди (Топ)</span></th>
                                 <th class="px-4 py-3 bg-green-50"><span data-i18n="thItem">Що (Топ)</span></th>
@@ -345,6 +461,42 @@
                     <div class="p-3 bg-green-50 rounded-lg text-center">
                         <p class="text-xs text-green-600 font-bold uppercase" data-i18n="modalAvgTitle">Сер. Чек</p>
                         <p class="text-lg font-bold text-gray-800" id="modalAvg">0 €</p>
+                    </div>
+                </div>
+
+                <!-- Weight info in modal -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="p-3 bg-teal-50 rounded-lg text-center">
+                        <p class="text-xs text-teal-600 font-bold uppercase" data-i18n="modalTotalWeight">Вага</p>
+                        <p class="text-lg font-bold text-gray-800" id="modalTotalWeight">0 kg</p>
+                    </div>
+                    <div class="p-3 bg-teal-50 rounded-lg text-center">
+                        <p class="text-xs text-teal-600 font-bold uppercase" data-i18n="modalAvgWeightTitle">Сер. Вага</p>
+                        <p class="text-lg font-bold text-gray-800" id="modalAvgWeight">0 kg</p>
+                    </div>
+                </div>
+
+                <!-- Channel info in modal -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2" data-i18n="modalSenderChTitle">📤 Канали відправлення</h4>
+                        <div id="modalSenderChannels" class="bg-gray-50 rounded-lg p-3"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2" data-i18n="modalReceiverChTitle">📥 Канали отримання</h4>
+                        <div id="modalReceiverChannels" class="bg-gray-50 rounded-lg p-3"></div>
+                    </div>
+                </div>
+
+                <!-- City info in modal -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2" data-i18n="modalSenderCitiesTitle">🏙️ Міста відправлення (Топ-5)</h4>
+                        <div id="modalSenderCities" class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-800 mb-2" data-i18n="modalReceiverCitiesTitle">🏙️ Міста отримання (Топ-5)</h4>
+                        <div id="modalReceiverCities" class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto"></div>
                     </div>
                 </div>
 

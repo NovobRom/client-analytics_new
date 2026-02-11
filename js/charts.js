@@ -6,11 +6,24 @@ import { state } from './config.js';
 import { TRANSLATIONS, getCountryName } from './i18n.js';
 import { triggerCountryFilter, triggerClientSearch } from './filters.js';
 
-export function renderCharts(clients, countryStats) {
+const CHANNEL_COLORS = { 'Door': '#3b82f6', 'Warehouse': '#f59e0b', 'PUDO': '#10b981', 'Postomat': '#8b5cf6' };
+const getChColor = (ch) => CHANNEL_COLORS[ch] || '#6b7280';
+
+export function renderCharts(data) {
+    const { clients, countryStats,
+        senderChannelCounts, receiverChannelCounts, channelFlowMatrix,
+        senderChannelRevenue, receiverChannelRevenue,
+        senderChannelShipments, receiverChannelShipments,
+        weightByDirection, weightByChannel, revenueByDirection,
+        senderCityStats, receiverCityStats, cityRouteStats } = data;
     const t = TRANSLATIONS[state.currentLang];
 
     // Destroy previous chart instances to avoid canvas reuse errors
-    ['revenue', 'revenueCountry', 'avgCheck', 'avgCheckCountry', 'count', 'dest'].forEach(k => {
+    ['revenue', 'revenueCountry', 'avgCheck', 'avgCheckCountry', 'count', 'dest',
+     'senderChannel', 'receiverChannel', 'channelRevenue', 'channelFlow',
+     'weightDirection', 'weightChannel',
+     'senderCity', 'receiverCity', 'cityRoute', 'revPerKg'
+    ].forEach(k => {
         if (state.charts[k]) state.charts[k].destroy();
     });
 
@@ -130,4 +143,219 @@ export function renderCharts(clients, countryStats) {
             }
         }
     });
+
+    // ========== NEW CHARTS ==========
+
+    // --- Sender Channel Distribution (doughnut) ---
+    const senderChEntries = Object.entries(senderChannelCounts).sort((a, b) => b[1] - a[1]);
+    if (senderChEntries.length > 0) {
+        const ctxSenderCh = document.getElementById('senderChannelChart').getContext('2d');
+        state.charts.senderChannel = new Chart(ctxSenderCh, {
+            type: 'doughnut',
+            data: {
+                labels: senderChEntries.map(e => `${e[0]} (${e[1]})`),
+                datasets: [{ data: senderChEntries.map(e => e[1]),
+                    backgroundColor: senderChEntries.map(e => getChColor(e[0])) }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        color: '#fff', font: { weight: 'bold', size: 11 },
+                        formatter: (val, ctx) => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            return ((val / total) * 100).toFixed(1) + '%';
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Receiver Channel Distribution (doughnut) ---
+    const receiverChEntries = Object.entries(receiverChannelCounts).sort((a, b) => b[1] - a[1]);
+    if (receiverChEntries.length > 0) {
+        const ctxReceiverCh = document.getElementById('receiverChannelChart').getContext('2d');
+        state.charts.receiverChannel = new Chart(ctxReceiverCh, {
+            type: 'doughnut',
+            data: {
+                labels: receiverChEntries.map(e => `${e[0]} (${e[1]})`),
+                datasets: [{ data: receiverChEntries.map(e => e[1]),
+                    backgroundColor: receiverChEntries.map(e => getChColor(e[0])) }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    datalabels: {
+                        color: '#fff', font: { weight: 'bold', size: 11 },
+                        formatter: (val, ctx) => {
+                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                            return ((val / total) * 100).toFixed(1) + '%';
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // --- Revenue by Sender Channel (horizontal bar) ---
+    const chRevEntries = Object.entries(senderChannelRevenue).sort((a, b) => b[1] - a[1]);
+    if (chRevEntries.length > 0) {
+        const ctxChRev = document.getElementById('channelRevenueChart').getContext('2d');
+        state.charts.channelRevenue = new Chart(ctxChRev, {
+            type: 'bar',
+            data: {
+                labels: chRevEntries.map(e => e[0]),
+                datasets: [{
+                    label: t.chartLabelRev,
+                    data: chRevEntries.map(e => e[1]),
+                    backgroundColor: chRevEntries.map(e => getChColor(e[0])),
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } }
+            }
+        });
+    }
+
+    // --- Channel Flow Matrix (stacked bar) ---
+    const senderChannelsArr = Object.keys(senderChannelCounts).sort();
+    const receiverChannelsArr = Object.keys(receiverChannelCounts).sort();
+    if (senderChannelsArr.length > 0 && receiverChannelsArr.length > 0) {
+        const flowDatasets = receiverChannelsArr.map(rCh => ({
+            label: rCh,
+            data: senderChannelsArr.map(sCh => channelFlowMatrix[`${sCh}→${rCh}`] || 0),
+            backgroundColor: getChColor(rCh),
+            stack: 'Stack 0'
+        }));
+        const ctxFlow = document.getElementById('channelFlowChart').getContext('2d');
+        state.charts.channelFlow = new Chart(ctxFlow, {
+            type: 'bar',
+            data: { labels: senderChannelsArr, datasets: flowDatasets },
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                scales: { x: { stacked: true }, y: { stacked: true } },
+                plugins: { datalabels: { display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
+                    color: 'white', font: { size: 9 }, formatter: Math.round } }
+            }
+        });
+    }
+
+    // --- Avg Weight by Direction Top-10 (horizontal bar) ---
+    const weightDirEntries = Object.entries(weightByDirection)
+        .map(([dir, v]) => ({ dir, avgWeight: v.totalWeight / v.count, count: v.count }))
+        .filter(x => x.count >= 3)
+        .sort((a, b) => b.avgWeight - a.avgWeight)
+        .slice(0, 10);
+    if (weightDirEntries.length > 0) {
+        const ctxWeightDir = document.getElementById('weightDirectionChart').getContext('2d');
+        state.charts.weightDirection = new Chart(ctxWeightDir, {
+            type: 'bar',
+            data: {
+                labels: weightDirEntries.map(e => e.dir),
+                datasets: [{ label: t.chartLabelAvgWeight || 'Avg Weight (kg)',
+                    data: weightDirEntries.map(e => Math.round(e.avgWeight * 100) / 100),
+                    backgroundColor: '#14b8a6', borderRadius: 4 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(2) + ' kg' } } }
+        });
+    }
+
+    // --- Avg Weight by Channel (bar) ---
+    const weightChEntries = Object.entries(weightByChannel)
+        .map(([ch, v]) => ({ ch, avgWeight: v.totalWeight / v.count }))
+        .sort((a, b) => b.avgWeight - a.avgWeight);
+    if (weightChEntries.length > 0) {
+        const ctxWeightCh = document.getElementById('weightChannelChart').getContext('2d');
+        state.charts.weightChannel = new Chart(ctxWeightCh, {
+            type: 'bar',
+            data: {
+                labels: weightChEntries.map(e => e.ch),
+                datasets: [{ label: t.chartLabelAvgWeight || 'Avg Weight (kg)',
+                    data: weightChEntries.map(e => Math.round(e.avgWeight * 100) / 100),
+                    backgroundColor: weightChEntries.map(e => getChColor(e.ch)),
+                    borderRadius: 4 }]
+            },
+            options: { responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfig, formatter: v => v.toFixed(2) } } }
+        });
+    }
+
+    // --- Top Sender Cities by Revenue (horizontal bar) ---
+    const topSenderCities = Object.entries(senderCityStats)
+        .sort((a, b) => b[1].rev - a[1].rev).slice(0, 10);
+    if (topSenderCities.length > 0) {
+        const ctxSenderCity = document.getElementById('senderCityChart').getContext('2d');
+        state.charts.senderCity = new Chart(ctxSenderCity, {
+            type: 'bar',
+            data: {
+                labels: topSenderCities.map(e => e[0]),
+                datasets: [{ label: t.chartLabelRev, data: topSenderCities.map(e => e[1].rev),
+                    backgroundColor: '#6366f1', borderRadius: 4 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } } }
+        });
+    }
+
+    // --- Top Receiver Cities by Revenue (horizontal bar) ---
+    const topReceiverCities = Object.entries(receiverCityStats)
+        .sort((a, b) => b[1].rev - a[1].rev).slice(0, 10);
+    if (topReceiverCities.length > 0) {
+        const ctxReceiverCity = document.getElementById('receiverCityChart').getContext('2d');
+        state.charts.receiverCity = new Chart(ctxReceiverCity, {
+            type: 'bar',
+            data: {
+                labels: topReceiverCities.map(e => e[0]),
+                datasets: [{ label: t.chartLabelRev, data: topReceiverCities.map(e => e[1].rev),
+                    backgroundColor: '#ec4899', borderRadius: 4 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } } }
+        });
+    }
+
+    // --- Top City Routes by Count (horizontal bar) ---
+    const topRoutes = Object.entries(cityRouteStats)
+        .sort((a, b) => b[1].count - a[1].count).slice(0, 10);
+    if (topRoutes.length > 0) {
+        const ctxRoute = document.getElementById('cityRouteChart').getContext('2d');
+        state.charts.cityRoute = new Chart(ctxRoute, {
+            type: 'bar',
+            data: {
+                labels: topRoutes.map(e => e[0]),
+                datasets: [{ label: t.chartLabelCount, data: topRoutes.map(e => e[1].count),
+                    backgroundColor: '#f97316', borderRadius: 4 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: dlConfigH } }
+        });
+    }
+
+    // --- Revenue per kg by Direction Top-10 (horizontal bar) ---
+    const revPerKgEntries = Object.entries(weightByDirection)
+        .filter(([dir, v]) => v.totalWeight > 0 && v.count >= 3)
+        .map(([dir, v]) => ({
+            dir,
+            revPerKg: (revenueByDirection[dir] || 0) / v.totalWeight
+        }))
+        .sort((a, b) => b.revPerKg - a.revPerKg)
+        .slice(0, 10);
+    if (revPerKgEntries.length > 0) {
+        const ctxRevPerKg = document.getElementById('revPerKgChart').getContext('2d');
+        state.charts.revPerKg = new Chart(ctxRevPerKg, {
+            type: 'bar',
+            data: {
+                labels: revPerKgEntries.map(e => e.dir),
+                datasets: [{ label: t.chartLabelRevPerKg || '€/kg',
+                    data: revPerKgEntries.map(e => Math.round(e.revPerKg * 100) / 100),
+                    backgroundColor: '#059669', borderRadius: 4 }]
+            },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(2) + ' €/kg' } } }
+        });
+    }
 }

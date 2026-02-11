@@ -5,7 +5,7 @@ import { getCountryName } from './i18n.js';
 import { openModal } from './modal.js';
 
 // Module-local sort direction state (not shared globally)
-const sortDir = { name: 1, abcClass: 1, segment: 1, revenue: -1, count: -1, avgCheck: -1 };
+const sortDir = { name: 1, abcClass: 1, segment: 1, revenue: -1, count: -1, totalWeight: -1, avgCheck: -1 };
 
 export function renderTable(clients) {
     const tbody = document.getElementById('clientTableBody');
@@ -30,7 +30,7 @@ export function renderTable(clients) {
     document.getElementById('btnNext').disabled = state.currentPage === totalPages || totalItems === 0;
 
     if (totalItems === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center py-4 text-gray-400">No data found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-4 text-gray-400">No data found</td></tr>';
         return;
     }
 
@@ -67,6 +67,7 @@ export function renderTable(clients) {
             <td class="px-4 py-3"><span class="${segClass} text-xs font-medium px-2 py-0.5 rounded">${c.segment}</span></td>
             <td class="px-4 py-3 text-right font-bold text-gray-800">${c.revenue.toLocaleString('uk-UA', { minimumFractionDigits: 2 })}</td>
             <td class="px-4 py-3 text-center">${c.count}</td>
+            <td class="px-4 py-3 text-right text-xs font-medium text-teal-700 bg-teal-50">${c.totalWeight.toFixed(1)}</td>
             <td class="px-4 py-3 text-right text-xs font-semibold text-blue-600 bg-yellow-50">${c.avgCheck.toLocaleString('uk-UA', { minimumFractionDigits: 2 })}</td>
             <td class="px-4 py-3 bg-blue-50 text-xs text-gray-700 whitespace-pre-wrap">${topDestString}</td>
             <td class="px-4 py-3 bg-green-50 text-xs text-gray-600 italic whitespace-pre-wrap">${c.topItems}</td>

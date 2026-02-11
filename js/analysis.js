@@ -41,11 +41,53 @@ export function formatDate(dateObj) {
     return `${d}.${m}.${y}`;
 }
 
+export function cleanCityName(raw) {
+    if (!raw) return '';
+    let city = raw.toString().trim();
+    const prefixes = [
+        /^Селище\s+міського\s+типу\s+/i,
+        /^Селище\s+/i,
+        /^Село\s+/i,
+        /^Місто\s+/i,
+        /^Смт\.\s*/i,
+        /^Смт\s+/i,
+        /^Village\s+/i,
+        /^Town\s+/i,
+        /^City\s+/i,
+        /^с\.\s*/i,
+        /^м\.\s*/i,
+    ];
+    for (const re of prefixes) {
+        city = city.replace(re, '');
+    }
+    return city.trim();
+}
+
+export function parseWeight(raw) {
+    if (raw == null || raw === '') return 0;
+    if (typeof raw === 'number') return Math.round(raw * 100) / 100;
+    let str = raw.toString().replace(',', '.').replace(/\s/g, '');
+    const val = parseFloat(str);
+    return isNaN(val) ? 0 : Math.round(val * 100) / 100;
+}
+
 export function analyzeData(rows) {
     const idxs = state.rawColIndices;
     let clients = {}, totalRev = 0, totalShipments = 0, segmentStats = {}, countryStats = {}, detectedOrigins = new Set();
     let minDate = null, maxDate = null;
     let originStats = {};
+
+    // Channel accumulators
+    let senderChannelCounts = {}, receiverChannelCounts = {}, channelFlowMatrix = {};
+    let senderChannelRevenue = {}, receiverChannelRevenue = {};
+    let senderChannelShipments = {}, receiverChannelShipments = {};
+
+    // Weight accumulators
+    let totalWeight = 0, weightedShipmentCount = 0;
+    let weightByDirection = {}, weightByChannel = {}, revenueByDirection = {};
+
+    // City accumulators
+    let senderCityStats = {}, receiverCityStats = {}, cityRouteStats = {};
 
     rows.forEach(row => {
         if (idxs.idxDate !== -1) {
@@ -85,7 +127,13 @@ export function analyzeData(rows) {
         if (!countryStats[dest]) countryStats[dest] = { rev: 0, count: 0 };
         countryStats[dest].rev += revenueEur; countryStats[dest].count += 1;
 
-        if (!clients[name]) clients[name] = { name, revenue: 0, count: 0, segment, origin: orig, type: row[idxs.idxType], phone: "", items: {}, destinations: {} };
+        if (!clients[name]) clients[name] = {
+            name, revenue: 0, count: 0, segment, origin: orig,
+            type: row[idxs.idxType], phone: "", items: {}, destinations: {},
+            totalWeight: 0, weightedCount: 0,
+            senderChannels: {}, receiverChannels: {},
+            senderCities: {}, receiverCities: {}
+        };
         if (idxs.idxPhone !== -1 && !clients[name].phone && row[idxs.idxPhone]) clients[name].phone = row[idxs.idxPhone];
 
         clients[name].revenue += revenueEur; clients[name].count += 1;
@@ -94,6 +142,73 @@ export function analyzeData(rows) {
         const cleanItem = item.toString().trim().substring(0, 30);
         clients[name].items[cleanItem] = (clients[name].items[cleanItem] || 0) + 1;
         clients[name].destinations[dest] = (clients[name].destinations[dest] || 0) + 1;
+
+        // --- Channel data ---
+        const senderCh = (idxs.idxSenderChannel !== -1 && row[idxs.idxSenderChannel])
+            ? row[idxs.idxSenderChannel].toString().trim() : '';
+        const receiverCh = (idxs.idxReceiverChannel !== -1 && row[idxs.idxReceiverChannel])
+            ? row[idxs.idxReceiverChannel].toString().trim() : '';
+
+        if (senderCh) {
+            senderChannelCounts[senderCh] = (senderChannelCounts[senderCh] || 0) + 1;
+            senderChannelRevenue[senderCh] = (senderChannelRevenue[senderCh] || 0) + revenueEur;
+            senderChannelShipments[senderCh] = (senderChannelShipments[senderCh] || 0) + 1;
+            clients[name].senderChannels[senderCh] = (clients[name].senderChannels[senderCh] || 0) + 1;
+        }
+        if (receiverCh) {
+            receiverChannelCounts[receiverCh] = (receiverChannelCounts[receiverCh] || 0) + 1;
+            receiverChannelRevenue[receiverCh] = (receiverChannelRevenue[receiverCh] || 0) + revenueEur;
+            receiverChannelShipments[receiverCh] = (receiverChannelShipments[receiverCh] || 0) + 1;
+            clients[name].receiverChannels[receiverCh] = (clients[name].receiverChannels[receiverCh] || 0) + 1;
+        }
+        if (senderCh && receiverCh) {
+            const flowKey = `${senderCh}→${receiverCh}`;
+            channelFlowMatrix[flowKey] = (channelFlowMatrix[flowKey] || 0) + 1;
+        }
+
+        // --- Weight data ---
+        const weight = (idxs.idxWeight !== -1) ? parseWeight(row[idxs.idxWeight]) : 0;
+        if (weight > 0) {
+            totalWeight += weight;
+            weightedShipmentCount += 1;
+            clients[name].totalWeight += weight;
+            clients[name].weightedCount += 1;
+            const dirKey = `${orig}→${dest}`;
+            if (!weightByDirection[dirKey]) weightByDirection[dirKey] = { totalWeight: 0, count: 0 };
+            weightByDirection[dirKey].totalWeight += weight;
+            weightByDirection[dirKey].count += 1;
+            if (!revenueByDirection[dirKey]) revenueByDirection[dirKey] = 0;
+            revenueByDirection[dirKey] += revenueEur;
+            if (senderCh) {
+                if (!weightByChannel[senderCh]) weightByChannel[senderCh] = { totalWeight: 0, count: 0 };
+                weightByChannel[senderCh].totalWeight += weight;
+                weightByChannel[senderCh].count += 1;
+            }
+        }
+
+        // --- City data ---
+        const senderCity = (idxs.idxSenderCity !== -1) ? cleanCityName(row[idxs.idxSenderCity]) : '';
+        const receiverCity = (idxs.idxReceiverCity !== -1) ? cleanCityName(row[idxs.idxReceiverCity]) : '';
+
+        if (senderCity) {
+            if (!senderCityStats[senderCity]) senderCityStats[senderCity] = { count: 0, rev: 0 };
+            senderCityStats[senderCity].count += 1;
+            senderCityStats[senderCity].rev += revenueEur;
+            clients[name].senderCities[senderCity] = (clients[name].senderCities[senderCity] || 0) + 1;
+        }
+        if (receiverCity) {
+            if (!receiverCityStats[receiverCity]) receiverCityStats[receiverCity] = { count: 0, rev: 0 };
+            receiverCityStats[receiverCity].count += 1;
+            receiverCityStats[receiverCity].rev += revenueEur;
+            clients[name].receiverCities[receiverCity] = (clients[name].receiverCities[receiverCity] || 0) + 1;
+        }
+        if (senderCity && receiverCity) {
+            const routeKey = `${senderCity}→${receiverCity}`;
+            if (!cityRouteStats[routeKey]) cityRouteStats[routeKey] = { count: 0, rev: 0 };
+            cityRouteStats[routeKey].count += 1;
+            cityRouteStats[routeKey].rev += revenueEur;
+        }
+
         totalRev += revenueEur; totalShipments += 1;
     });
 
@@ -119,6 +234,23 @@ export function analyzeData(rows) {
         };
     });
 
+    // Channel preference by ABC class
+    const channelByAbc = { A: {}, B: {}, C: {} };
+    clientList.forEach(c => {
+        Object.entries(c.senderChannels).forEach(([ch, cnt]) => {
+            channelByAbc[c.abcClass][ch] = (channelByAbc[c.abcClass][ch] || 0) + cnt;
+        });
+    });
+
+    // Average weight by ABC class
+    const weightByAbc = { A: { total: 0, count: 0 }, B: { total: 0, count: 0 }, C: { total: 0, count: 0 } };
+    clientList.forEach(c => {
+        if (c.weightedCount > 0) {
+            weightByAbc[c.abcClass].total += c.totalWeight;
+            weightByAbc[c.abcClass].count += c.weightedCount;
+        }
+    });
+
     return {
         clients: clientList,
         totalRev,
@@ -129,6 +261,19 @@ export function analyzeData(rows) {
         originStats,
         abcCounts: { A: countA, B: countB, C: countC },
         detectedOrigins: Array.from(detectedOrigins),
-        dateRange: { min: minDate, max: maxDate }
+        dateRange: { min: minDate, max: maxDate },
+        // Channel metrics
+        senderChannelCounts, receiverChannelCounts, channelFlowMatrix,
+        senderChannelRevenue, receiverChannelRevenue,
+        senderChannelShipments, receiverChannelShipments,
+        channelByAbc,
+        // Weight metrics
+        totalWeight, weightedShipmentCount,
+        avgWeight: weightedShipmentCount ? Math.round((totalWeight / weightedShipmentCount) * 100) / 100 : 0,
+        revenuePerKg: totalWeight > 0 ? Math.round((totalRev / totalWeight) * 100) / 100 : 0,
+        weightByDirection, weightByChannel, revenueByDirection,
+        weightByAbc,
+        // City metrics
+        senderCityStats, receiverCityStats, cityRouteStats
     };
 }
