@@ -96,6 +96,11 @@ function mapColumnIndices(headers) {
         idxSegment: getIdx("Сегмент відправника_"),
         idxPhone: getIdx("тел отправитель") !== -1 ? getIdx("тел отправитель") : getIdx("Телефон відправника"),
         idxDate: dateIdx,
-        idxCurr: currIdx
+        idxCurr: currIdx,
+        idxSenderChannel: getIdx("Тип підрозділу відправника"),
+        idxReceiverChannel: getIdx("Тип підрозділу отримувача"),
+        idxWeight: getIdx("Розрахункова вага"),
+        idxSenderCity: getIdx("Місто відправник"),
+        idxReceiverCity: getIdx("Місто отримувач")
     };
 }

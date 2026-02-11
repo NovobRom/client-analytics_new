@@ -33,11 +33,71 @@ export function renderDashboard(data) {
     document.getElementById('countB').textContent = data.abcCounts.B;
     document.getElementById('countC').textContent = data.abcCounts.C;
 
+    // Weight KPIs
+    document.getElementById('totalWeight').textContent =
+        data.totalWeight.toLocaleString('uk-UA', { maximumFractionDigits: 1 }) + ' kg';
+    document.getElementById('avgWeight').textContent =
+        data.avgWeight.toLocaleString('uk-UA', { maximumFractionDigits: 2 }) + ' kg';
+    document.getElementById('revenuePerKg').textContent =
+        data.revenuePerKg.toLocaleString('uk-UA', { maximumFractionDigits: 2 }) + ' €/kg';
+    document.getElementById('weightedShipments').textContent =
+        data.weightedShipmentCount.toLocaleString('uk-UA');
+
+    renderChannelAbcPreferences(data.channelByAbc);
+    renderWeightByAbc(data.weightByAbc);
     renderOriginBreakdown(data.originStats, data.totalRev);
     renderSegmentButtons(data.segmentStats);
-    renderCharts(data.clients, data.countryStats);
+    renderCharts(data);
     applyCombinedFilters();
     updateAbcVisualState();
+}
+
+function renderChannelAbcPreferences(channelByAbc) {
+    const container = document.getElementById('channelAbcContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const t = TRANSLATIONS[state.currentLang];
+    const classLabels = { A: t.classA || 'Class A (VIP)', B: t.classB || 'Class B', C: t.classC || 'Class C' };
+    const classBg = { A: 'bg-yellow-50 border-yellow-200', B: 'bg-gray-50 border-gray-200', C: 'bg-orange-50 border-orange-200' };
+
+    ['A', 'B', 'C'].forEach(cls => {
+        const entries = Object.entries(channelByAbc[cls] || {}).sort((a, b) => b[1] - a[1]);
+        const total = entries.reduce((s, e) => s + e[1], 0);
+        const div = document.createElement('div');
+        div.className = `p-3 rounded-lg border ${classBg[cls]}`;
+        div.innerHTML = `
+            <p class="text-xs font-bold mb-2">${classLabels[cls]}</p>
+            ${total === 0 ? '<p class="text-xs text-gray-400">—</p>' : entries.map(([ch, cnt]) => {
+                const pct = total ? ((cnt / total) * 100).toFixed(1) : 0;
+                return `<div class="flex justify-between text-xs mb-1">
+                    <span>${ch}</span>
+                    <span class="font-bold">${pct}% (${cnt})</span>
+                </div>`;
+            }).join('')}
+        `;
+        container.appendChild(div);
+    });
+}
+
+function renderWeightByAbc(weightByAbc) {
+    const container = document.getElementById('weightAbcContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    const t = TRANSLATIONS[state.currentLang];
+    const classLabels = { A: t.classA || 'Class A (VIP)', B: t.classB || 'Class B', C: t.classC || 'Class C' };
+
+    ['A', 'B', 'C'].forEach(cls => {
+        const d = weightByAbc[cls];
+        const avg = d.count > 0 ? (d.total / d.count).toFixed(2) : '0.00';
+        const div = document.createElement('div');
+        div.className = 'p-3 bg-gray-50 rounded-lg border';
+        div.innerHTML = `
+            <p class="text-xs font-bold text-gray-500">${classLabels[cls]}</p>
+            <p class="text-2xl font-bold text-gray-800">${avg} kg</p>
+            <p class="text-xs text-gray-400">${d.count} ${t.thCount || 'shipments'}</p>
+        `;
+        container.appendChild(div);
+    });
 }
 
 export function renderOriginBreakdown(originStats, totalRev) {

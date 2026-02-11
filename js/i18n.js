@@ -67,7 +67,38 @@ export const TRANSLATIONS = {
         lblTotalRows: "Всього рядків:",
         btnPrev: "Назад",
         btnNext: "Вперед",
-        lblPage: "Стор."
+        lblPage: "Стор.",
+        // Weight
+        totalWeight: "Загальна вага",
+        avgWeightShipment: "Сер. вага / відправлення",
+        revenuePerKg: "Дохід за кг",
+        shipmentsWithWeight: "Відправок з вагою",
+        thWeight: "Вага (кг)",
+        // Channel charts
+        chartSenderChannels: "📤 Розподіл каналів відправлення",
+        chartReceiverChannels: "📥 Розподіл каналів отримання",
+        chartChannelRevenue: "💰 Дохід за каналом відправлення",
+        chartChannelFlow: "🔀 Матриця потоку каналів",
+        channelAbcTitle: "Канальні вподобання за ABC класом",
+        // Weight charts
+        chartWeightByDirection: "📦 Середня вага за напрямком (Топ-10)",
+        chartWeightByChannel: "⚖️ Середня вага за каналом",
+        weightAbcTitle: "Середня вага за ABC класом",
+        chartLabelAvgWeight: "Сер. вага (кг)",
+        // City charts
+        chartTopSenderCities: "🏙️ Топ-10 міст відправлення (дохід)",
+        chartTopReceiverCities: "🏙️ Топ-10 міст отримання (дохід)",
+        chartTopCityRoutes: "🛤️ Топ-10 маршрутів місто→місто",
+        chartRevPerKgDirection: "💎 Дохід за кг по напрямку (Топ-10)",
+        chartRevPerKgHint: "Ідентифікація преміум-маршрутів",
+        chartLabelRevPerKg: "€/кг",
+        // Modal additions
+        modalTotalWeight: "Вага",
+        modalAvgWeightTitle: "Сер. Вага",
+        modalSenderChTitle: "📤 Канали відправлення",
+        modalReceiverChTitle: "📥 Канали отримання",
+        modalSenderCitiesTitle: "🏙️ Міста відправлення (Топ-5)",
+        modalReceiverCitiesTitle: "🏙️ Міста отримання (Топ-5)"
     },
     en: {
         appTitle: "Client Analytics v14.1",
@@ -133,7 +164,38 @@ export const TRANSLATIONS = {
         lblTotalRows: "Total rows:",
         btnPrev: "Prev",
         btnNext: "Next",
-        lblPage: "Page"
+        lblPage: "Page",
+        // Weight
+        totalWeight: "Total Weight",
+        avgWeightShipment: "Avg Weight / Shipment",
+        revenuePerKg: "Revenue per kg",
+        shipmentsWithWeight: "Shipments with Weight",
+        thWeight: "Weight (kg)",
+        // Channel charts
+        chartSenderChannels: "📤 Sender Channel Distribution",
+        chartReceiverChannels: "📥 Receiver Channel Distribution",
+        chartChannelRevenue: "💰 Revenue by Sender Channel",
+        chartChannelFlow: "🔀 Channel Flow Matrix",
+        channelAbcTitle: "Channel Preferences by ABC Class",
+        // Weight charts
+        chartWeightByDirection: "📦 Avg Weight by Direction (Top 10)",
+        chartWeightByChannel: "⚖️ Avg Weight by Channel",
+        weightAbcTitle: "Avg Weight by ABC Class",
+        chartLabelAvgWeight: "Avg Weight (kg)",
+        // City charts
+        chartTopSenderCities: "🏙️ Top 10 Sender Cities (Revenue)",
+        chartTopReceiverCities: "🏙️ Top 10 Receiver Cities (Revenue)",
+        chartTopCityRoutes: "🛤️ Top 10 City-to-City Routes",
+        chartRevPerKgDirection: "💎 Revenue per kg by Direction (Top 10)",
+        chartRevPerKgHint: "Premium route identification",
+        chartLabelRevPerKg: "€/kg",
+        // Modal additions
+        modalTotalWeight: "Weight",
+        modalAvgWeightTitle: "Avg Weight",
+        modalSenderChTitle: "📤 Sender Channels",
+        modalReceiverChTitle: "📥 Receiver Channels",
+        modalSenderCitiesTitle: "🏙️ Sender Cities (Top 5)",
+        modalReceiverCitiesTitle: "🏙️ Receiver Cities (Top 5)"
     }
 };
 
