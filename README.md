@@ -1,4 +1,4 @@
-# Client Analytics Tool v17.0
+# Client Analytics Tool v18.0
 
 **Developer:** Roman Novobranets
 **Type:** Static Multi-File SPA (Client-Side Only) + PWA (Installable)
