@@ -53,3 +53,16 @@ canvas { cursor: pointer; }
 .filter-scroll::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
 }
+
+/* Sticky First Column in Table */
+#clientTableBody tr td:first-child,
+thead tr th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 10;
+    background: white;
+}
+
+thead tr th:first-child {
+    background: rgb(249, 250, 251); /* bg-gray-50 */
+}

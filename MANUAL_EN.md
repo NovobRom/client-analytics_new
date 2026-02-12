@@ -1,4 +1,4 @@
-# 📊 User Manual: Client Analytics v16.0
+# 📊 User Manual: Client Analytics v17.0
 
 > [!CAUTION]
 > ## 🔒 SECURITY — YOUR DATA NEVER LEAVES YOUR COMPUTER
@@ -28,13 +28,36 @@
 
 ---
 
-## ⚙️ 2. Global Filters (Analysis Settings Panel)
+## 📱 2. Installing the App (PWA)
+
+You can install this tool as a native application on your computer or phone. This allows you to work offline and launch it directly from your desktop/home screen.
+
+- **Desktop (Chrome/Edge):** Click the install icon (monitor with a down arrow) on the right side of the address bar.
+- **Mobile (iOS):** Tap "Share" → "Add to Home Screen".
+- **Mobile (Android):** Tap the menu (three dots) → "Install App" or "Add to Home Screen".
+
+---
+
+## 🔧 3. Column Mapping Wizard 
+
+Occasionally, your file might have different column names than the tool expects. If the auto-detection fails to find critical columns:
+
+1. A **"Column Mapping"** window will appear automatically.
+2. It lists the required fields (e.g., Client Name, Revenue, Country).
+3. Use the dropdown menus to select the corresponding column from your file for each field.
+4. Click **Confirm** to proceed with the analysis.
+
+You can also open this wizard manually at any time by clicking the **Settings (Gear) Icon** next to the language toggle.
+
+---
+
+## ⚙️ 4. Global Filters (Analysis Settings Panel)
 
 The **Analysis Settings** panel appears just below the header after a file is loaded.
 
-| Filter | What it does |
-|---|---|
-| 📤 **Origin Countries** | Show only shipments from selected origin countries (e.g., LT only) |
+| Filter                      | What it does                                                       |
+| --------------------------- | ------------------------------------------------------------------ |
+| 📤 **Origin Countries**      | Show only shipments from selected origin countries (e.g., LT only) |
 | 📥 **Destination Countries** | Show only shipments going to selected countries (e.g., DE, PL, CZ) |
 
 - Use **"All"** / **"None"** buttons for quick bulk selection.
@@ -42,66 +65,66 @@ The **Analysis Settings** panel appears just below the header after a file is lo
 
 ---
 
-## 💰 3. Currency & Exchange Rates
+## 💰 5. Currency & Exchange Rates
 
 All revenue values are normalised to **Euro (€)** regardless of the original currency in the file.
 
-| Badge | Meaning |
-|---|---|
-| 🟢 **Rates: Live** | Today's exchange rates were fetched successfully from the internet |
+| Badge              | Meaning                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------- |
+| 🟢 **Rates: Live**  | Today's exchange rates were fetched successfully from the internet                             |
 | 🟡 **Rates: Fixed** | No internet access; stable fallback averages are used (UAH, PLN, USD, GBP, CZK, RON, MDL, HUF) |
 
 The currency badge appears in the header once a file is loaded.
 
 ---
 
-## 🏆 4. ABC Analysis — VIP Client Identification
+## 🏆 6. ABC Analysis — VIP Client Identification
 
 Clients are automatically segmented using the **Pareto principle**:
 
-| Class | Revenue share | Who they are |
-|---|---|---|
-| 🟡 **A (VIP)** | Top 80% of total revenue | Your most valuable clients — prioritise them |
-| ⚪ **B** | Next 15% | Stable "middle" clients with growth potential |
-| 🟠 **C** | Remaining 5% | Smaller or occasional clients |
+| Class         | Revenue share            | Who they are                                  |
+| ------------- | ------------------------ | --------------------------------------------- |
+| 🟡 **A (VIP)** | Top 80% of total revenue | Your most valuable clients — prioritise them  |
+| ⚪ **B**       | Next 15%                 | Stable "middle" clients with growth potential |
+| 🟠 **C**       | Remaining 5%             | Smaller or occasional clients                 |
 
 **Interactive:** Click any ABC card to **filter the detailed table** to that class only. Click again to clear the filter.
 
 ---
 
-## 📈 5. KPI Cards
+## 📈 7. KPI Cards
 
 ### Revenue & Clients
-| Card | Description |
-|---|---|
-| Total Clients | Unique senders in the filtered dataset |
-| Total Revenue | Sum of all shipment values in EUR |
-| Avg Check (Global) | Total revenue ÷ total shipments |
+| Card               | Description                            |
+| ------------------ | -------------------------------------- |
+| Total Clients      | Unique senders in the filtered dataset |
+| Total Revenue      | Sum of all shipment values in EUR      |
+| Avg Check (Global) | Total revenue ÷ total shipments        |
 
 ### Weight
-| Card | Description |
-|---|---|
-| Total Weight | Sum of all shipment weights (kg) |
-| Avg Weight / Shipment | Average kg per shipment |
-| Revenue per kg | Total revenue ÷ total weight — identifies premium routes |
-| Shipments with Weight | Count of shipments that have a weight value |
+| Card                  | Description                                              |
+| --------------------- | -------------------------------------------------------- |
+| Total Weight          | Sum of all shipment weights (kg)                         |
+| Avg Weight / Shipment | Average kg per shipment                                  |
+| Revenue per kg        | Total revenue ÷ total weight — identifies premium routes |
+| Shipments with Weight | Count of shipments that have a weight value              |
 
 ---
 
-## 📊 6. Charts
+## 📊 8. Charts
 
 The dashboard contains **16 interactive charts** grouped by topic:
 
-| Group | Charts |
-|---|---|
-| **Countries** | Top destination countries by revenue · Top countries by avg check |
-| **Clients — Financial** | Top 10 clients by revenue · Top 10 clients by avg check |
-| **Clients — Volume** | Top 10 clients by shipment count · Top destinations of top-10 clients |
-| **Channels** | Sender channel distribution · Receiver channel distribution |
-| **Channel Revenue** | Revenue by sender channel · Channel flow matrix (sender → receiver pairs) |
-| **Weight** | Avg weight by direction (top 10) · Avg weight by channel |
-| **Cities** | Top 10 sender cities · Top 10 receiver cities |
-| **Routes** | Top 10 city-to-city routes · Revenue per kg by direction |
+| Group                   | Charts                                                                    |
+| ----------------------- | ------------------------------------------------------------------------- |
+| **Countries**           | Top destination countries by revenue · Top countries by avg check         |
+| **Clients — Financial** | Top 10 clients by revenue · Top 10 clients by avg check                   |
+| **Clients — Volume**    | Top 10 clients by shipment count · Top destinations of top-10 clients     |
+| **Channels**            | Sender channel distribution · Receiver channel distribution               |
+| **Channel Revenue**     | Revenue by sender channel · Channel flow matrix (sender → receiver pairs) |
+| **Weight**              | Avg weight by direction (top 10) · Avg weight by channel                  |
+| **Cities**              | Top 10 sender cities · Top 10 receiver cities                             |
+| **Routes**              | Top 10 city-to-city routes · Revenue per kg by direction                  |
 
 **Tips:**
 - **Hover** over any bar to see the exact value.
@@ -111,7 +134,7 @@ The dashboard contains **16 interactive charts** grouped by topic:
 
 ---
 
-## 🔢 7. Channel & Weight Analytics
+## 🔢 9. Channel & Weight Analytics
 
 Two summary panels appear above the charts:
 
@@ -120,7 +143,7 @@ Two summary panels appear above the charts:
 
 ---
 
-## 🗺️ 8. Origin Breakdown
+## 🗺️ 10. Origin Breakdown
 
 The **"Revenue by Origin Country"** section shows a card per origin country with:
 - Country flag and ISO code.
@@ -131,24 +154,27 @@ Useful for comparing the performance of different offices or branches.
 
 ---
 
-## 📋 9. Detailed Client Table
+## 📋 11. Detailed Client Table
 
 The table lists every client aggregated from the filtered data.
 
 ### Sorting
 Click any column header to sort the entire list (not just the visible page):
 
-| Column | Description |
-|---|---|
-| Client | Sender name |
-| ABC | Client class (A / B / C) |
-| Segment | Client segment from the source file |
-| Revenue (EUR) | Total revenue converted to EUR |
-| Count | Number of shipments |
-| Weight (kg) | Total weight across all shipments |
-| Avg Check | Revenue ÷ shipment count |
-| Where (Top) | Most frequent destination countries |
-| What (Top) | Most frequently shipped items |
+| Column        | Description                         |
+| ------------- | ----------------------------------- |
+| Client        | Sender name                         |
+| ABC           | Client class (A / B / C)            |
+| Segment       | Client segment from the source file |
+| Revenue (EUR) | Total revenue converted to EUR      |
+| Count         | Number of shipments                 |
+| Weight (kg)   | Total weight across all shipments   |
+| Avg Check     | Revenue ÷ shipment count            |
+| Where (Top)   | Most frequent destination countries |
+| What (Top)    | Most frequently shipped items       |
+
+### Sticky Headers
+The table header and the first column ("Client") now stay visible while scrolling, making it easier to read large datasets.
 
 ### Search
 Type in the **search box** above the table to filter by client name. Results update 300 ms after you stop typing.
@@ -160,28 +186,28 @@ Type in the **search box** above the table to filter by client name. Results upd
 
 ---
 
-## 👤 10. Client Detail Card
+## 👤 12. Client Detail Card
 
 Click any row in the table to open the full **Client Card**. It shows:
 
-| Section | Content |
-|---|---|
-| 📞 Phone | Sender phone number — ready to copy |
-| Revenue / ABC / Count / Avg Check | Core financial metrics |
-| Weight / Avg Weight | Total and per-shipment weight |
-| 📤 Sender Channels | Which channels this client uses to send parcels |
-| 📥 Receiver Channels | Which channels their recipients use to collect |
-| 🏙️ Sender Cities (Top 5) | Cities this client ships from most often |
-| 🏙️ Receiver Cities (Top 5) | Cities their recipients are in |
-| 🌍 Geography | Full destination breakdown with flags and counts |
-| 📦 Items | Top items this client has shipped |
-| Origin / Segment | Country and segment label |
+| Section                           | Content                                          |
+| --------------------------------- | ------------------------------------------------ |
+| 📞 Phone                           | Sender phone number — ready to copy              |
+| Revenue / ABC / Count / Avg Check | Core financial metrics                           |
+| Weight / Avg Weight               | Total and per-shipment weight                    |
+| 📤 Sender Channels                 | Which channels this client uses to send parcels  |
+| 📥 Receiver Channels               | Which channels their recipients use to collect   |
+| 🏙️ Sender Cities (Top 5)           | Cities this client ships from most often         |
+| 🏙️ Receiver Cities (Top 5)         | Cities their recipients are in                   |
+| 🌍 Geography                       | Full destination breakdown with flags and counts |
+| 📦 Items                           | Top items this client has shipped                |
+| Origin / Segment                  | Country and segment label                        |
 
 Close by clicking **[Close]**, pressing `Esc`, or clicking outside the card.
 
 ---
 
-## 🔍 11. Segment Filter
+## 🔍 13. Segment Filter
 
 Below the charts, a row of **segment buttons** is generated from the data. Click one to filter the table to that segment only. The active filter label is shown above the table. Click the button again or the **"✖"** label to clear it.
 

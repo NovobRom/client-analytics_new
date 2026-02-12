@@ -5,6 +5,15 @@ import { state } from './config.js';
 import { setupGlobalFilters } from './filters.js';
 import { recalculateDashboard } from './analysis.js';
 import { updateRateBadge } from './currency.js';
+import { TRANSLATIONS } from './i18n.js';
+import { showToast } from './notifications.js';
+import {
+    autoMapColumns,
+    showMappingWizard,
+    loadMappingFromStorage,
+    saveMappingToStorage,
+    COLUMN_DEFINITIONS
+} from './columnMapper.js';
 
 export function handleFileUpload(event) {
     const file = event.target.files[0];
@@ -16,7 +25,11 @@ export function handleFileUpload(event) {
         const fileName = file.name.toLowerCase();
         if (fileName.endsWith('.csv')) processCSV(file);
         else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) processExcel(file);
-        else { alert("Unsupported file type"); hideLoading(); }
+        else {
+            const t = TRANSLATIONS[state.currentLang];
+            showToast(t.unsupportedFileType || 'Непідтримуваний тип файлу. Використовуйте CSV або XLSX', 'error');
+            hideLoading();
+        }
     }, 100);
 }
 
@@ -31,76 +44,125 @@ function processCSV(file) {
     Papa.parse(file, {
         header: false,
         skipEmptyLines: true,
-        complete: function(results) { findHeaderAndProcess(results.data); },
-        error: function(err) { alert("Error parsing CSV: " + err.message); hideLoading(); }
+        complete: function (results) { findHeaderAndProcess(results.data); },
+        error: function (err) {
+            const t = TRANSLATIONS[state.currentLang];
+            showToast(`${t.csvParseError || 'Помилка парсингу CSV'}: ${err.message}`, 'error');
+            hideLoading();
+        }
     });
 }
 
 function processExcel(file) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
         try {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
             const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { header: 1 });
             findHeaderAndProcess(jsonData);
-        } catch (error) { alert("Error processing Excel"); hideLoading(); }
+        } catch (error) {
+            const t = TRANSLATIONS[state.currentLang];
+            showToast(t.excelProcessError || 'Помилка обробки Excel файлу', 'error');
+            hideLoading();
+        }
     };
     reader.readAsArrayBuffer(file);
 }
 
-function findHeaderAndProcess(rows) {
+async function findHeaderAndProcess(rows) {
+    const t = TRANSLATIONS[state.currentLang];
+
+    // Try to find header row by checking for known column aliases
     let headerRowIndex = -1;
     for (let i = 0; i < Math.min(rows.length, 30); i++) {
-        const rowStr = rows[i].join(" ");
-        if (rowStr.includes("Контрагент відправник по МЕН") && rowStr.includes("Shipment вартість послуг")) {
-            headerRowIndex = i; break;
+        const row = rows[i];
+        if (!row || row.length < 3) continue;
+
+        // Count how many known aliases we find in this row
+        let matchCount = 0;
+        COLUMN_DEFINITIONS.forEach(def => {
+            row.forEach(cell => {
+                if (!cell || typeof cell !== 'string') return;
+                const cellLower = cell.toLowerCase().trim();
+                if (def.aliases.some(alias => cellLower.includes(alias.toLowerCase()))) {
+                    matchCount++;
+                }
+            });
+        });
+
+        // If we find at least 3 known columns, consider this the header row
+        if (matchCount >= 3) {
+            headerRowIndex = i;
+            break;
         }
     }
-    if (headerRowIndex === -1) { alert("Header not found"); hideLoading(); return; }
+
+    if (headerRowIndex === -1) {
+        showToast(t.headerNotFound || 'Не знайдено рядок з заголовками колонок', 'error');
+        hideLoading();
+        return;
+    }
 
     state.rawHeaders = rows[headerRowIndex];
     state.rawRows = rows.slice(headerRowIndex + 1);
-    mapColumnIndices(state.rawHeaders);
+
+    // Try to load saved mapping first
+    let mapping = loadMappingFromStorage(state.rawHeaders);
+
+    if (!mapping) {
+        // Auto-map columns
+        const { mapped, unmapped } = autoMapColumns(state.rawHeaders);
+
+        if (unmapped.length > 0) {
+            // Show wizard for unmapped required columns
+            const userMapping = await showMappingWizard(state.rawHeaders, unmapped);
+
+            if (!userMapping) {
+                // User cancelled
+                showToast(t.mappingCancelled || 'Маппінг колонок скасовано', 'warning');
+                hideLoading();
+                return;
+            }
+
+            // Merge auto-mapped and user-mapped
+            mapping = { ...mapped, ...userMapping };
+
+            // Save for future use
+            saveMappingToStorage(mapping, state.rawHeaders);
+            showToast(t.mappingSaved || 'Налаштування колонок збережено', 'success', 3000);
+        } else {
+            // All columns auto-mapped successfully
+            mapping = mapped;
+        }
+    }
+
+    state.rawColIndices = mapping;
     setupGlobalFilters();
     recalculateDashboard();
     updateRateBadge();
     hideLoading();
 }
 
-function mapColumnIndices(headers) {
-    const colMap = {};
-    headers.forEach((h, i) => { if (typeof h === 'string') colMap[h.trim()] = i; });
-    const getIdx = (name) => {
-        if (colMap[name] !== undefined) return colMap[name];
-        const key = Object.keys(colMap).find(k => k.toLowerCase().includes(name.toLowerCase()));
-        return key !== undefined ? colMap[key] : -1;
-    };
+/**
+ * Open the column mapping wizard manually
+ */
+export async function openColumnWizard() {
+    if (!state.rawHeaders || state.rawHeaders.length === 0) {
+        const t = TRANSLATIONS[state.currentLang];
+        showToast(t.noFileLoaded || 'Спершу завантажте файл', 'warning');
+        return;
+    }
 
-    let dateIdx = getIdx("IWB дата створення");
-    if (dateIdx === -1) dateIdx = getIdx("Дата оформлення");
-    if (dateIdx === -1) dateIdx = getIdx("Shipment Date");
-    if (dateIdx === -1) dateIdx = getIdx("Дата");
+    const t = TRANSLATIONS[state.currentLang];
+    const userMapping = await showMappingWizard(state.rawHeaders, state.rawColIndices);
 
-    let currIdx = getIdx("Shipment валюта вартості послуг");
-    if (currIdx === -1) currIdx = getIdx("Валюта");
-    if (currIdx === -1) currIdx = getIdx("Currency");
-
-    state.rawColIndices = {
-        idxName: getIdx("Контрагент відправник по МЕН"),
-        idxRev: getIdx("Shipment вартість послуг"),
-        idxCountry: getIdx("Країна-відправник"),
-        idxDestCountry: getIdx("Країна отримувач"),
-        idxType: getIdx("Тип відправника по МЕН"),
-        idxDesc: getIdx("Опис відправлення"),
-        idxSegment: getIdx("Сегмент відправника_"),
-        idxPhone: getIdx("тел отправитель") !== -1 ? getIdx("тел отправитель") : getIdx("Телефон відправника"),
-        idxDate: dateIdx,
-        idxCurr: currIdx,
-        idxSenderChannel: getIdx("Тип підрозділу відправника"),
-        idxReceiverChannel: getIdx("Тип підрозділу отримувача"),
-        idxWeight: getIdx("Розрахункова вага"),
-        idxSenderCity: getIdx("Місто відправник"),
-        idxReceiverCity: getIdx("Місто отримувач")
-    };
+    if (userMapping) {
+        state.rawColIndices = userMapping;
+        saveMappingToStorage(userMapping, state.rawHeaders);
+        setupGlobalFilters();
+        recalculateDashboard();
+        updateRateBadge();
+        showToast(t.mappingSaved || 'Налаштування колонок збережено', 'success');
+    }
 }

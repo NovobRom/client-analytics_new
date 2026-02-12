@@ -5,14 +5,14 @@ export const ITEMS_PER_PAGE = 50;
 
 export const FALLBACK_RATES = {
     'EUR': 1.0,
-    'USD': 1.08,
-    'UAH': 42.50,
-    'PLN': 4.30,
-    'GBP': 0.85,
-    'CZK': 25.30,
-    'RON': 4.97,
-    'MDL': 19.30,
-    'HUF': 390.0
+    'USD': 1.19,
+    'UAH': 51.13,
+    'PLN': 4.22,
+    'GBP': 0.87,
+    'CZK': 24.26,
+    'RON': 5.09,
+    'MDL': 20.11,
+    'HUF': 379.5
 };
 
 export const COUNTRY_MAP = {

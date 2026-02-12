@@ -20,9 +20,9 @@ export function renderCharts(data) {
 
     // Destroy previous chart instances to avoid canvas reuse errors
     ['revenue', 'revenueCountry', 'avgCheck', 'avgCheckCountry', 'count', 'dest',
-     'senderChannel', 'receiverChannel', 'channelRevenue', 'channelFlow',
-     'weightDirection', 'weightChannel',
-     'senderCity', 'receiverCity', 'cityRoute', 'revPerKg'
+        'senderChannel', 'receiverChannel', 'channelRevenue', 'channelFlow',
+        'weightDirection', 'weightChannel',
+        'senderCity', 'receiverCity', 'cityRoute', 'revPerKg'
     ].forEach(k => {
         if (state.charts[k]) state.charts[k].destroy();
     });
@@ -47,6 +47,7 @@ export function renderCharts(data) {
         },
         options: {
             indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            layout: { padding: { right: 50 } },
             onClick: (evt, elements, chart) => { if (elements.length > 0) triggerCountryFilter(chart.data._rawCodes[elements[0].index]); },
             plugins: { datalabels: dlConfigH }
         }
@@ -67,6 +68,7 @@ export function renderCharts(data) {
         },
         options: {
             indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            layout: { padding: { right: 50 } },
             plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(1) } }
         }
     });
@@ -80,7 +82,7 @@ export function renderCharts(data) {
             responsive: true, maintainAspectRatio: false,
             onClick: (evt, el, chart) => { if (el.length) triggerClientSearch(chart.data.labels[el[0].index]); },
             plugins: { datalabels: dlConfig },
-            scales: { x: { ticks: { callback: function(val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } } }
+            scales: { x: { ticks: { callback: function (val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } } }
         }
     });
 
@@ -93,7 +95,7 @@ export function renderCharts(data) {
             responsive: true, maintainAspectRatio: false,
             onClick: (evt, el, chart) => { if (el.length) triggerClientSearch(chart.data.labels[el[0].index]); },
             plugins: { datalabels: { ...dlConfig, formatter: v => v.toFixed(0) } },
-            scales: { x: { ticks: { callback: function(val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } } }
+            scales: { x: { ticks: { callback: function (val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } } }
         }
     });
 
@@ -106,7 +108,7 @@ export function renderCharts(data) {
             responsive: true, maintainAspectRatio: false,
             onClick: (evt, el, chart) => { if (el.length) triggerClientSearch(chart.data.labels[el[0].index]); },
             plugins: { datalabels: dlConfig },
-            scales: { x: { ticks: { callback: function(val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } } }
+            scales: { x: { ticks: { callback: function (val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } } }
         }
     });
 
@@ -133,12 +135,12 @@ export function renderCharts(data) {
             onClick: (evt, el, chart) => { if (el.length) triggerClientSearch(chart.data.labels[el[0].index]); },
             plugins: {
                 datalabels: {
-                    display: context => context.dataset.data[context.dataIndex] > 0,
+                    display: 'auto',
                     color: 'white', font: { size: 9 }, formatter: Math.round
                 }
             },
             scales: {
-                x: { stacked: true, ticks: { callback: function(val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } },
+                x: { stacked: true, ticks: { callback: function (val) { return this.getLabelForValue(val).substr(0, 10) + '...'; } } },
                 y: { stacked: true }
             }
         }
@@ -154,13 +156,16 @@ export function renderCharts(data) {
             type: 'doughnut',
             data: {
                 labels: senderChEntries.map(e => `${e[0]} (${e[1]})`),
-                datasets: [{ data: senderChEntries.map(e => e[1]),
-                    backgroundColor: senderChEntries.map(e => getChColor(e[0])) }]
+                datasets: [{
+                    data: senderChEntries.map(e => e[1]),
+                    backgroundColor: senderChEntries.map(e => getChColor(e[0]))
+                }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
                     datalabels: {
+                        display: 'auto',
                         color: '#fff', font: { weight: 'bold', size: 11 },
                         formatter: (val, ctx) => {
                             const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -180,8 +185,10 @@ export function renderCharts(data) {
             type: 'doughnut',
             data: {
                 labels: receiverChEntries.map(e => `${e[0]} (${e[1]})`),
-                datasets: [{ data: receiverChEntries.map(e => e[1]),
-                    backgroundColor: receiverChEntries.map(e => getChColor(e[0])) }]
+                datasets: [{
+                    data: receiverChEntries.map(e => e[1]),
+                    backgroundColor: receiverChEntries.map(e => getChColor(e[0]))
+                }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
@@ -215,6 +222,7 @@ export function renderCharts(data) {
             },
             options: {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 50 } },
                 plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } }
             }
         });
@@ -237,8 +245,12 @@ export function renderCharts(data) {
             options: {
                 indexAxis: 'y', responsive: true, maintainAspectRatio: false,
                 scales: { x: { stacked: true }, y: { stacked: true } },
-                plugins: { datalabels: { display: ctx => ctx.dataset.data[ctx.dataIndex] > 0,
-                    color: 'white', font: { size: 9 }, formatter: Math.round } }
+                plugins: {
+                    datalabels: {
+                        display: 'auto',
+                        color: 'white', font: { size: 9 }, formatter: Math.round
+                    }
+                }
             }
         });
     }
@@ -255,12 +267,17 @@ export function renderCharts(data) {
             type: 'bar',
             data: {
                 labels: weightDirEntries.map(e => e.dir),
-                datasets: [{ label: t.chartLabelAvgWeight || 'Avg Weight (kg)',
+                datasets: [{
+                    label: t.chartLabelAvgWeight || 'Avg Weight (kg)',
                     data: weightDirEntries.map(e => Math.round(e.avgWeight * 100) / 100),
-                    backgroundColor: '#14b8a6', borderRadius: 4 }]
+                    backgroundColor: '#14b8a6', borderRadius: 4
+                }]
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(2) + ' kg' } } }
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 50 } },
+                plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(2) + ' kg' } }
+            }
         });
     }
 
@@ -274,13 +291,17 @@ export function renderCharts(data) {
             type: 'bar',
             data: {
                 labels: weightChEntries.map(e => e.ch),
-                datasets: [{ label: t.chartLabelAvgWeight || 'Avg Weight (kg)',
+                datasets: [{
+                    label: t.chartLabelAvgWeight || 'Avg Weight (kg)',
                     data: weightChEntries.map(e => Math.round(e.avgWeight * 100) / 100),
                     backgroundColor: weightChEntries.map(e => getChColor(e.ch)),
-                    borderRadius: 4 }]
+                    borderRadius: 4
+                }]
             },
-            options: { responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { ...dlConfig, formatter: v => v.toFixed(2) } } }
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: { datalabels: { ...dlConfig, formatter: v => v.toFixed(2) } }
+            }
         });
     }
 
@@ -293,11 +314,16 @@ export function renderCharts(data) {
             type: 'bar',
             data: {
                 labels: topSenderCities.map(e => e[0]),
-                datasets: [{ label: t.chartLabelRev, data: topSenderCities.map(e => e[1].rev),
-                    backgroundColor: '#6366f1', borderRadius: 4 }]
+                datasets: [{
+                    label: t.chartLabelRev, data: topSenderCities.map(e => e[1].rev),
+                    backgroundColor: '#6366f1', borderRadius: 4
+                }]
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } } }
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 50 } },
+                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } }
+            }
         });
     }
 
@@ -310,11 +336,16 @@ export function renderCharts(data) {
             type: 'bar',
             data: {
                 labels: topReceiverCities.map(e => e[0]),
-                datasets: [{ label: t.chartLabelRev, data: topReceiverCities.map(e => e[1].rev),
-                    backgroundColor: '#ec4899', borderRadius: 4 }]
+                datasets: [{
+                    label: t.chartLabelRev, data: topReceiverCities.map(e => e[1].rev),
+                    backgroundColor: '#ec4899', borderRadius: 4
+                }]
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } } }
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 50 } },
+                plugins: { datalabels: { ...dlConfigH, formatter: v => Math.round(v).toLocaleString() } }
+            }
         });
     }
 
@@ -327,11 +358,16 @@ export function renderCharts(data) {
             type: 'bar',
             data: {
                 labels: topRoutes.map(e => e[0]),
-                datasets: [{ label: t.chartLabelCount, data: topRoutes.map(e => e[1].count),
-                    backgroundColor: '#f97316', borderRadius: 4 }]
+                datasets: [{
+                    label: t.chartLabelCount, data: topRoutes.map(e => e[1].count),
+                    backgroundColor: '#f97316', borderRadius: 4
+                }]
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: dlConfigH } }
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 50 } },
+                plugins: { datalabels: dlConfigH }
+            }
         });
     }
 
@@ -350,12 +386,17 @@ export function renderCharts(data) {
             type: 'bar',
             data: {
                 labels: revPerKgEntries.map(e => e.dir),
-                datasets: [{ label: t.chartLabelRevPerKg || '€/kg',
+                datasets: [{
+                    label: t.chartLabelRevPerKg || '€/kg',
                     data: revPerKgEntries.map(e => Math.round(e.revPerKg * 100) / 100),
-                    backgroundColor: '#059669', borderRadius: 4 }]
+                    backgroundColor: '#059669', borderRadius: 4
+                }]
             },
-            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-                plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(2) + ' €/kg' } } }
+            options: {
+                indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+                layout: { padding: { right: 50 } },
+                plugins: { datalabels: { ...dlConfigH, formatter: v => v.toFixed(2) + ' €/kg' } }
+            }
         });
     }
 }
