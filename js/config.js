@@ -1,5 +1,6 @@
 // --- Configuration: Constants & Shared State ---
 
+export const APP_VERSION = '17.0';
 export const POTENTIAL_BUSINESS_COUNT = 3;
 export const ITEMS_PER_PAGE = 50;
 

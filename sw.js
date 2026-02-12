@@ -1,7 +1,9 @@
 // Service Worker for Client Analytics PWA
 // Caches CDN dependencies and local files for offline functionality
 
-const CACHE_NAME = 'client-analytics-v17-0';
+import { APP_VERSION } from './js/config.js';
+
+const CACHE_NAME = `client-analytics-v${APP_VERSION}`;
 const CDN_CACHE = 'cdn-cache-v1';
 
 // Files to cache
