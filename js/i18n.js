@@ -153,7 +153,7 @@ export const TRANSLATIONS = {
         exportSheetName: "Аналіз Клієнтів"
     },
     en: {
-        appTitle: "Client Analytics v18.00",
+        appTitle: "Client Analytics v18.1",
         btnUpload: "Upload File",
         loadingText: "Processing Data...",
         loadingSub: "This may take a few seconds",

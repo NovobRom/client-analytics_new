@@ -122,7 +122,7 @@ export const MANUAL_CONTENT = {
     `,
     en: `
         <div class="space-y-6 text-gray-800">
-            <h1 class="text-3xl font-bold text-indigo-700 border-b pb-2">📊 User Manual: Client Analytics v18.0</h1>
+            <h1 class="text-3xl font-bold text-indigo-700 border-b pb-2">📊 User Manual: Client Analytics v18.1</h1>
 
             <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-sm">
                 <h2 class="text-lg font-bold text-red-700 flex items-center gap-2">
