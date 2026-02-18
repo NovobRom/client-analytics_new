@@ -15,7 +15,7 @@ export function recalculateDashboard() {
         const o = (row[state.rawColIndices.idxCountry] || "").toString().trim().toUpperCase();
         const d = (row[state.rawColIndices.idxDestCountry] || "").toString().trim().toUpperCase();
         return (activeOrigins.includes(o) || (!o && activeOrigins.length === 0)) &&
-               (activeDests.includes(d) || (!d && activeDests.length === 0));
+            (activeDests.includes(d) || (!d && activeDests.length === 0));
     });
 
     const analysisResult = analyzeData(filteredRows);
@@ -209,6 +209,23 @@ export function analyzeData(rows) {
             cityRouteStats[routeKey].rev += revenueEur;
         }
 
+        // --- Shipment History ---
+        const shipmentNum = (idxs.idxShipmentNumber !== -1) ? row[idxs.idxShipmentNumber] : '';
+        const dateVal = parseDate(row[idxs.idxDate]);
+
+        // Ensure we initialize shipmentHistory array
+        if (!clients[name].shipmentHistory) clients[name].shipmentHistory = [];
+
+        if (dateVal && !isNaN(dateVal.getTime())) {
+            // Only add if we have a valid date. 
+            // If shipmentNum is missing, we can still record the date event, 
+            // but ideally we want both.
+            clients[name].shipmentHistory.push({
+                date: dateVal,
+                number: shipmentNum ? shipmentNum.toString().trim() : 'N/A'
+            });
+        }
+
         totalRev += revenueEur; totalShipments += 1;
     });
 
@@ -224,13 +241,36 @@ export function analyzeData(rows) {
         if (percentage <= 80) abcClass = 'A'; else if (percentage <= 95) abcClass = 'B';
         if (abcClass === 'A') countA++; if (abcClass === 'B') countB++; if (abcClass === 'C') countC++;
         segmentStats[c.segment] = (segmentStats[c.segment] || 0) + 1;
+
+        // Process shipment history for this client
+        c.shipmentHistory.sort((a, b) => a.date - b.date);
+
+        let firstDate = null;
+        let lastDate = null;
+        let frequencyDays = 0;
+
+        if (c.shipmentHistory.length > 0) {
+            firstDate = c.shipmentHistory[0].date;
+            lastDate = c.shipmentHistory[c.shipmentHistory.length - 1].date;
+
+            if (c.shipmentHistory.length > 1) {
+                const diffTime = Math.abs(lastDate - firstDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                // frequency = total days range / (number of shipments - 1) intervals
+                frequencyDays = diffDays / (c.shipmentHistory.length - 1);
+            }
+        }
+
         return {
             ...c,
             avgCheck: c.count ? (c.revenue / c.count) : 0,
             topItems: getTopKeys(c.items, 3),
             destinationsMap: c.destinations,
             isHiddenBiz: (c.type === 'Private person' && c.count >= POTENTIAL_BUSINESS_COUNT),
-            abcClass
+            abcClass,
+            firstShipmentDate: firstDate,
+            lastShipmentDate: lastDate,
+            shipmentFrequency: frequencyDays
         };
     });
 

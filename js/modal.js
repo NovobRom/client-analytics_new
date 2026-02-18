@@ -69,6 +69,46 @@ export function openModal(client) {
         renderCityList(client.senderCities, 'modalSenderCities');
         renderCityList(client.receiverCities, 'modalReceiverCities');
 
+        // Shipment History & Analysis
+        const formatDate = (d) => {
+            if (!d) return '-';
+            return d.getDate().toString().padStart(2, '0') + '.' + (d.getMonth() + 1).toString().padStart(2, '0') + '.' + d.getFullYear();
+        };
+
+        document.getElementById('modalFirstDate').textContent = formatDate(client.firstShipmentDate);
+        document.getElementById('modalLastDate').textContent = formatDate(client.lastShipmentDate);
+
+        const freq = client.shipmentFrequency;
+        let freqText = '-';
+        if (freq > 0) {
+            if (freq < 1) freqText = "Often (<1 day)";
+            else freqText = `Every ~${Math.round(freq)} days`;
+        }
+        document.getElementById('modalFrequency').textContent = freqText;
+
+        const historyEl = document.getElementById('modalHistoryList');
+        const historyCount = document.getElementById('modalHistoryCount');
+
+        if (client.shipmentHistory && client.shipmentHistory.length > 0) {
+            historyCount.textContent = client.shipmentHistory.length;
+            // Reverse sort for display (newest first) ??? User asked for "sorted by IWB date creation"
+            // usually history is best seen newest first. But user said "analyze when was first, when last".
+            // "I want to see MEN Shipment sorted by IWB creation date".
+            // Let's show newest first as it is more standard for "History", but keep underlying array sorted ascending for calculations.
+
+            const historySorted = [...client.shipmentHistory].sort((a, b) => b.date - a.date);
+
+            historyEl.innerHTML = historySorted.map(item => `
+                <div class="flex justify-between border-b border-gray-200 last:border-0 py-1">
+                    <span class="text-gray-700 font-mono">${item.number}</span>
+                    <span class="text-xs text-gray-500">${formatDate(item.date)}</span>
+                </div>
+            `).join('');
+        } else {
+            historyCount.textContent = '0';
+            historyEl.innerHTML = '<span class="text-xs text-gray-400">—</span>';
+        }
+
         modal.classList.remove('hidden');
         setTimeout(() => {
             panel.classList.remove('scale-95', 'opacity-0');

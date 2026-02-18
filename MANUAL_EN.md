@@ -1,4 +1,4 @@
-# 📊 User Manual: Client Analytics v17.0
+# 📊 User Manual: Client Analytics v18.1
 
 > [!CAUTION]
 > ## 🔒 SECURITY — YOUR DATA NEVER LEAVES YOUR COMPUTER

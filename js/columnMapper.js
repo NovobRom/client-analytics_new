@@ -95,6 +95,12 @@ export const COLUMN_DEFINITIONS = [
         required: false,
         aliases: ['Місто отримувач', 'Receiver City', 'To City', 'Destination City'],
         labelKey: 'colReceiverCity'
+    },
+    {
+        key: 'idxShipmentNumber',
+        required: false,
+        aliases: ['МЕН Shipment', 'Номер відправлення', 'Shipment Number', 'Tracking Number', 'Waybill'],
+        labelKey: 'colShipmentNumber'
     }
 ];
 

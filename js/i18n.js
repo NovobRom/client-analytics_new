@@ -4,7 +4,7 @@ import { state, COUNTRY_MAP } from './config.js';
 
 export const TRANSLATIONS = {
     ua: {
-        appTitle: "Аналітика Клієнтів v18.00",
+        appTitle: "Аналітика Клієнтів v18.1",
         btnUpload: "Завантажити файл",
         loadingText: "Обробка даних...",
         loadingSub: "Це може зайняти кілька секунд",
